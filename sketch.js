@@ -10,6 +10,7 @@ var playeralpha = 300;
 var collision;
 var counter;
 var loselife;
+var state;
 
 
 var star = [];
@@ -39,6 +40,9 @@ function setup() {
   player = new Player();
   counter = 0;
 
+  //initial game state
+  state = 0;
+
   //set physics settings
   //target indicates where the player will go
   //initially set target to the ypos so it does not move on loading
@@ -60,54 +64,100 @@ function draw() {
     ellipse(i*2, star[i], 2, 2);
   }
 
-  //planets
-  for (let i =0; i <planets.length; i++){
-    planets[i].move();
-    planets[i].display();
-   // planets[i].intersects();
-  };
+  //intro state
+  if (state == 0){
+    textFont("Bangers");
+    fill(255);
+    textSize(100);
+    text('Space Battle', window.innerWidth/2 - 200, 240);
 
+    textSize(30);
+    fill(150);
+    text('Avoid all of the wild space junk to win!', window.innerWidth/2 - 200, 300);
 
-  //physics movement variables
-  force = target - ypos;
-  force *= strength;
-  vel *= drag;
-  vel+= force;
-  ypos +=vel;
+    textSize(50);
+    fill(255);
+    text('Tap to Begin', window.innerWidth/2 - 100, 400);
 
-  fill(255);
-  textSize(32);
-  text('Lives: '+ lives, 10, 30);
-
+    if (mouseIsPressed){
+      console.log("clicked");
+      xpos = 100;
+      ypos = 300;
+      target = ypos;
+      lives = 3;
+      playeralpha = 300;
+      collision = false;
+      state = 1;
+    }
+  }
   
 
-  player.display();
+  //game state
+  if (state == 1){
+    //planets
+    for (let i =0; i <planets.length; i++){
+      planets[i].move();
+      planets[i].display();
+     // planets[i].intersects();
+    };
 
-  //opacity changes when player is hit and loses a life
-  if (collision == true){
-      //loselife = true;
-      playeralpha = 150;
 
-      counter ++;
-      if (counter > 100){
-        counter = 0;
-        playeralpha = 300;
-        collision = false;
-      }
-  }
+    //physics movement variables
+    force = target - ypos;
+    force *= strength;
+    vel *= drag;
+    vel+= force;
+    ypos +=vel;
 
-  if (loselife == true){
-    var loseonelife = 0;
-    for (var i = 0; i >= 1; i++) {
-      loseonelife ++;
-      lives --;
-      loseonelife = 0;
-      loselife = false;
+    fill(255);
+    textSize(40);
+    text('Lives: '+ lives, window.innerWidth - 200, 50);
+
+    player.display();
+
+    //opacity changes when player is hit and loses a life
+    if (collision == true){
+        //loselife = true;
+        playeralpha = 150;
+
+        counter ++;
+        if (counter > 100){
+          counter = 0;
+          playeralpha = 300;
+          collision = false;
+        }
+    }
+
+    if (lives == 0){
+      state = 2;
     }
 
   }
 
- 
+  //lose state
+  if (state == 2){
+    fill(255);
+    textSize(100);
+    text('You Lose!', window.innerWidth/2-150, 300);
+
+    textSize(50);
+    text('Tap to Play Again', window.innerWidth/2 - 150, 400);
+
+    //reset game
+    if (mouseIsPressed){
+      console.log("clicked");
+      xpos = 100;
+      ypos = 300;
+      target = ypos;
+      lives = 3;
+      playeralpha = 300;
+      collision = false;
+      state = 1;
+    }
+
+    //state = 1; 
+  }
+
 
   //bounds added to player to stay within window
   if (ypos >= 600){
@@ -198,6 +248,7 @@ class Planet{
       rect(0, 400, 400, 400);
       collision = true;
       this.x = -50;
+      lives --;
       //player.collision();
     }
   }
